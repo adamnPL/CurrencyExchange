@@ -46,4 +46,8 @@ public class CurrencyList {
 		this.currencyRate = currencyRate;
 	}
 
+	public String toString() {
+		return getCurrencyCode() + " | " + getCurrencyName();
+	}
+
 }

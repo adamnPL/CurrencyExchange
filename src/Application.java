@@ -14,9 +14,13 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.toedter.calendar.JDateChooser;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -39,6 +43,8 @@ public class Application {
 	Calendar dateChoose;
 	JComboBox comboBox;
 	JTextArea textArea;
+	List<CurrencyList> list = new ArrayList<>();
+	JComboBox currencyComboBox;
 
 	/**
 	 * Launch the application.
@@ -87,6 +93,26 @@ public class Application {
 				try {
 					XMLDocumentHandler url = new XMLDocumentHandler();
 					Document doc = url.getXMLDocument((String) comboBox.getSelectedItem(), dateChooser.getCalendar());
+
+					NodeList nList = doc.getElementsByTagName("pozycja");
+					for (int i = 0; i < nList.getLength(); i++) {
+
+						Node nNode = nList.item(i);
+						if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+							Element eElement = (Element) nNode;
+							String kodWaluty = eElement.getElementsByTagName("kod_waluty").item(0).getTextContent();
+							String nazwaWAluty = eElement.getElementsByTagName("nazwa_waluty").item(0).getTextContent();
+							int przelicznik = 1;
+							double kurs = 1.0;
+							System.out.println(kodWaluty + " " + kurs);
+							list.add(new CurrencyList(kodWaluty, nazwaWAluty, przelicznik, kurs));
+							// comboBox_1.addItem(new CurrencyList(kodWaluty, nazwaWAluty, przelicznik,
+							// kurs));
+
+						}
+
+					}
+
 					DOMSource domSource = new DOMSource(doc);
 					StringWriter writer = new StringWriter();
 					StreamResult result = new StreamResult(writer);
@@ -94,8 +120,8 @@ public class Application {
 					Transformer transformer;
 					transformer = tf.newTransformer();
 					transformer.transform(domSource, result);
-					System.out.println(writer.toString());
-					textArea.setText(writer.toString());
+					/// System.out.println(writer.toString());
+					/// textArea.setText(writer.toString());
 				} catch (TransformerConfigurationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -118,24 +144,20 @@ public class Application {
 		textArea.setBounds(540, 60, -520, 330);
 		frame.getContentPane().add(textArea);
 
-		List<CurrencyList> list = new ArrayList<>();
-	//	list.add(new CurrencyList("PLN", "Polski z³oty", 1, 1.1));
-	///	list.add(new CurrencyList("EUR", "Polski z³oty", 1, 1.1));
-	//	list.add(new CurrencyList("USD", "Polski z³oty", 1, 1.1));
-
-		MyComboBox comboBox_1 = new MyComboBox(list);
-		comboBox_1.setBounds(20, 99, 426, 34);
-		comboBox_1.addItemListener(new ItemListener() {
+		currencyComboBox = new JComboBox();
+		currencyComboBox.setRenderer(new CustomComboRender());
+		currencyComboBox.setBounds(20, 99, 426, 34);
+		currencyComboBox.addItemListener(new ItemListener() {
 
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					CurrencyList currency = (CurrencyList) comboBox_1.getSelectedItem();
+					CurrencyList currency = (CurrencyList) currencyComboBox.getSelectedItem();
 					System.out.println(currency.getCurrencyCode());
 				}
 
 			}
 		});
-		frame.getContentPane().add(comboBox_1);
+		frame.getContentPane().add(currencyComboBox);
 	}
 }
