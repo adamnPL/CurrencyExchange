@@ -3,48 +3,31 @@ import java.awt.EventQueue;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.border.CompoundBorder;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import com.toedter.calendar.JDateChooser;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 public class Application {
 
 	private JFrame frame;
-	Calendar dateChoose;
-	JComboBox comboBox;
-	JTextArea textArea;
-	List<CurrencyList> list = new ArrayList<>();
-	JComboBox currencyComboBox;
+	private JComboBox<CurrencyTab> currencyTabCB;
+	private JComboBox<Currency> currencyCB;
+	private JTextField firstCurrencyTF;
+	private JTextField secondCurrencyTF;
+	private JTextField exchangeRateTF;
+	private double exchangeRate;
 
 	/**
 	 * Launch the application.
@@ -90,74 +73,91 @@ public class Application {
 		btnGetRates.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
-				try {
-					XMLDocumentHandler url = new XMLDocumentHandler();
-					Document doc = url.getXMLDocument((String) comboBox.getSelectedItem(), dateChooser.getCalendar());
+				XMLDocumentHandler url = new XMLDocumentHandler();
+				Document doc = url.getXMLDocument((String) currencyTabCB.getSelectedItem(), dateChooser.getCalendar());
 
-					NodeList nList = doc.getElementsByTagName("pozycja");
-					for (int i = 0; i < nList.getLength(); i++) {
+				NodeList nList = doc.getElementsByTagName("pozycja");
+				for (int i = 0; i < nList.getLength(); i++) {
 
-						Node nNode = nList.item(i);
-						if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-							Element eElement = (Element) nNode;
-							String kodWaluty = eElement.getElementsByTagName("kod_waluty").item(0).getTextContent();
-							String nazwaWAluty = eElement.getElementsByTagName("nazwa_waluty").item(0).getTextContent();
-							int przelicznik = 1;
-							double kurs = 1.0;
-							System.out.println(kodWaluty + " " + kurs);
-							list.add(new CurrencyList(kodWaluty, nazwaWAluty, przelicznik, kurs));
-							// comboBox_1.addItem(new CurrencyList(kodWaluty, nazwaWAluty, przelicznik,
-							// kurs));
-
-						}
+					Node nNode = nList.item(i);
+					if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+						Element eElement = (Element) nNode;
+						String currencyCode = eElement.getElementsByTagName("kod_waluty").item(0).getTextContent();
+						String currencyName = eElement.getElementsByTagName("nazwa_waluty").item(0).getTextContent();
+						String convertRateStr = eElement.getElementsByTagName("przelicznik").item(0).getTextContent();
+						int convertRate = Integer.parseInt(convertRateStr);
+						String exchangeRateStr = eElement.getElementsByTagName("kurs_sredni").item(0).getTextContent();
+						double exchangeRate = Double.parseDouble(exchangeRateStr.replaceAll(",", "."));
+						currencyCB.addItem(new Currency(currencyCode, currencyName, convertRate, exchangeRate));
 
 					}
 
-					DOMSource domSource = new DOMSource(doc);
-					StringWriter writer = new StringWriter();
-					StreamResult result = new StreamResult(writer);
-					TransformerFactory tf = TransformerFactory.newInstance();
-					Transformer transformer;
-					transformer = tf.newTransformer();
-					transformer.transform(domSource, result);
-					/// System.out.println(writer.toString());
-					/// textArea.setText(writer.toString());
-				} catch (TransformerConfigurationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (TransformerException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
-
 			}
 		});
 		btnGetRates.setBounds(456, 20, 150, 40);
 		frame.getContentPane().add(btnGetRates);
+		currencyTabCB = new JComboBox<CurrencyTab>();
+		currencyTabCB.setModel(new DefaultComboBoxModel(new String[] { "a", "b", "c", "h" }));
+		currencyTabCB.setBounds(180, 20, 266, 40);
+		frame.getContentPane().add(currencyTabCB);
 
-		comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] { "a", "b", "c", "h" }));
-		comboBox.setBounds(180, 20, 266, 40);
-		frame.getContentPane().add(comboBox);
-
-		textArea = new JTextArea();
-		textArea.setBounds(540, 60, -520, 330);
-		frame.getContentPane().add(textArea);
-
-		currencyComboBox = new JComboBox();
-		currencyComboBox.setRenderer(new CustomComboRender());
-		currencyComboBox.setBounds(20, 99, 426, 34);
-		currencyComboBox.addItemListener(new ItemListener() {
+		currencyCB = new JComboBox<Currency>();
+		currencyCB.setRenderer(new CustomComboRender());
+		currencyCB.setBounds(20, 99, 426, 34);
+		currencyCB.addItemListener(new ItemListener() {
 
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
-					CurrencyList currency = (CurrencyList) currencyComboBox.getSelectedItem();
-					System.out.println(currency.getCurrencyCode());
+					Currency currency = (Currency) currencyCB.getSelectedItem();
+					exchangeRate = currency.getCurrencyRate();
+					exchangeRateTF.setText(Double.toString(exchangeRate));
 				}
-
 			}
 		});
-		frame.getContentPane().add(currencyComboBox);
+		frame.getContentPane().add(currencyCB);
+
+		exchangeRateTF = new JTextField();
+		exchangeRateTF.setEditable(false);
+		exchangeRateTF.setBounds(20, 209, 552, 40);
+		frame.getContentPane().add(exchangeRateTF);
+		exchangeRateTF.setColumns(10);
+
+		firstCurrencyTF = new JTextField();
+		firstCurrencyTF.setBounds(20, 277, 552, 46);
+		firstCurrencyTF.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				Double wynik = exchangeRate * Double.parseDouble(firstCurrencyTF.getText());
+				String wynikStr = wynik.toString();
+				secondCurrencyTF.setText(wynikStr);
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				Double wynik = exchangeRate * Double.parseDouble(firstCurrencyTF.getText());
+				String wynikStr = wynik.toString();
+				secondCurrencyTF.setText(wynikStr);
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				Double wynik = exchangeRate * Double.parseDouble(firstCurrencyTF.getText());
+				String wynikStr = wynik.toString();
+				secondCurrencyTF.setText(wynikStr);
+			}
+		});
+		frame.getContentPane().add(firstCurrencyTF);
+		firstCurrencyTF.setColumns(10);
+
+		secondCurrencyTF = new JTextField();
+		secondCurrencyTF.setColumns(10);
+		secondCurrencyTF.setBounds(20, 348, 552, 46);
+		frame.getContentPane().add(secondCurrencyTF);
 	}
 }

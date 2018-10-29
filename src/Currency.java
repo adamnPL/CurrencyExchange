@@ -1,12 +1,12 @@
 
-public class CurrencyList {
+public class Currency {
 
 	private String currencyCode;
 	private String currencyName;
 	private int currencyExchangeRate;
 	private double currencyRate;
 
-	public CurrencyList(String currencyCode, String currencyName, int currencyExchangeRate, double currencyRate) {
+	public Currency(String currencyCode, String currencyName, int currencyExchangeRate, double currencyRate) {
 
 		this.currencyCode = currencyCode;
 		this.currencyName = currencyName;
