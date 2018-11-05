@@ -1,11 +1,10 @@
+public class CurrencyTableType {
 
-public class CurrencyTab {
+	private String code;
+	private String name;
 
-	String code;
-	String name;
+	public CurrencyTableType(String code, String name) {
 
-	public CurrencyTab() {
-		super();
 		this.code = code;
 		this.name = name;
 	}

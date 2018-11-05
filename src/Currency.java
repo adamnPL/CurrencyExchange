@@ -1,12 +1,13 @@
+import java.math.BigDecimal;
 
 public class Currency {
 
 	private String currencyCode;
 	private String currencyName;
 	private int currencyExchangeRate;
-	private double currencyRate;
+	private BigDecimal currencyRate;
 
-	public Currency(String currencyCode, String currencyName, int currencyExchangeRate, double currencyRate) {
+	public Currency(String currencyCode, String currencyName, int currencyExchangeRate, BigDecimal currencyRate) {
 
 		this.currencyCode = currencyCode;
 		this.currencyName = currencyName;
@@ -38,11 +39,11 @@ public class Currency {
 		this.currencyExchangeRate = currencyExchangeRate;
 	}
 
-	public double getCurrencyRate() {
+	public BigDecimal getCurrencyRate() {
 		return currencyRate;
 	}
 
-	public void setCurrencyRate(double currencyRate) {
+	public void setCurrencyRate(BigDecimal currencyRate) {
 		this.currencyRate = currencyRate;
 	}
 
