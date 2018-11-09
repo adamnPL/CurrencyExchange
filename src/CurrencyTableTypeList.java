@@ -13,8 +13,8 @@ public class CurrencyTableTypeList {
 
 	}
 
-	public List<CurrencyTableType> getCurrencyTabList() {
-		return currencyTabList;
+	public Object[] getCurrencyTabList() {
+		return currencyTabList.toArray();
 	}
 
 }

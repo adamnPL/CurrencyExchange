@@ -7,6 +7,8 @@ import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,12 +42,14 @@ public class XMLDocument {
 			while ((line = in.readLine()) != null)
 				if (line.startsWith(ratesType) && line.substring(5, 11).equals(formattedDate)) {
 					return line;
+
 				}
 			in.close();
 		} catch (MalformedURLException e) {
-			System.out.println("Malformed URL: " + e.getMessage());
+			JOptionPane.showMessageDialog(null, "Nieprawid³owy adres pliku " + domainAddress + fileName, "Error",
+					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException e) {
-			System.out.println("I/O Error: " + e.getMessage());
+			JOptionPane.showMessageDialog(null, "Ogólny b³¹d wejœcia/wyjœcia", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		return null;
 
@@ -56,16 +60,16 @@ public class XMLDocument {
 		URL ratesURL;
 		try {
 			ratesURL = new URL(domainAddress + ratesFileName + ".xml");
-			System.out.println(domainAddress + ratesFileName + ".xml");
 			URLConnection connection = ratesURL.openConnection();
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document document = builder.parse(connection.getInputStream());
 			return document;
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Nieprawid³owy adres pliku " + ratesFileName, "Error",
+					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Ogólny b³¹d wejœcia/wyjœcia", "Error", JOptionPane.ERROR_MESSAGE);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
