@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
@@ -34,14 +35,16 @@ public class Application implements DocumentListener {
 	private JFrame frame;
 	private JComboBox<CurrencyTableType> currencyTableCB;
 	private JComboBox<Currency> currencyCB;
-	private JTextField firstCurrencyTF;
-	private JTextField secondCurrencyTF;
-	private JTextField exchangeRateTF;
+	private JFormattedTextField firstCurrencyTF;
+	private JFormattedTextField secondCurrencyTF;
+	private JFormattedTextField exchangeRateTF;
 	private BigDecimal exchangeRate;
 	private JLabel lblCurrency;
 	private JLabel lblExchangeRate;
 	private JLabel lbCurrencyAmount;
 	private JLabel lblAmount;
+	private NumberFormat amountFormat = java.text.NumberFormat.getNumberInstance();
+	private NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance();
 
 	/**
 	 * Launch the application.
@@ -70,11 +73,18 @@ public class Application implements DocumentListener {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
+
 		frame = new JFrame();
 		frame.getContentPane().setBackground(new Color(153, 153, 153));
 		frame.setBounds(100, 100, 470, 450);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
+
+		/*
+		 * 
+		 * Calendar component
+		 * 
+		 */
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, -1);
@@ -83,6 +93,12 @@ public class Application implements DocumentListener {
 		dateChooser.setCalendar(calendar);
 		dateChooser.setBounds(20, 30, 150, 40);
 		frame.getContentPane().add(dateChooser);
+
+		/*
+		 * 
+		 * JButton component
+		 * 
+		 */
 
 		// get data JButton
 		JButton btnGetRates = new JButton("Pobierz kurs");
@@ -120,6 +136,12 @@ public class Application implements DocumentListener {
 		btnGetRates.setBounds(20, 92, 430, 50);
 		frame.getContentPane().add(btnGetRates);
 
+		/*
+		 * 
+		 * JComboBox component
+		 * 
+		 */
+
 		// currency table ComboBox
 		currencyTableCB = new JComboBox(new CurrencyTableTypeList().getCurrencyTabList());
 		currencyTableCB.setBounds(180, 30, 266, 40);
@@ -136,14 +158,20 @@ public class Application implements DocumentListener {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					Currency currency = (Currency) currencyCB.getSelectedItem();
 					exchangeRate = currency.getCurrencyRate();
-					exchangeRateTF.setText(exchangeRate.toString());
+					exchangeRateTF.setValue(exchangeRate);
 				}
 			}
 		});
 		frame.getContentPane().add(currencyCB);
 
+		/*
+		 * 
+		 * JFormattedTextField component
+		 * 
+		 */
+
 		// currency exchange rate JTextField
-		exchangeRateTF = new JTextField();
+		exchangeRateTF = new JFormattedTextField(amountFormat);
 		exchangeRateTF.setFont(new Font("Tahoma", Font.BOLD, 15));
 		exchangeRateTF.setBackground(SystemColor.activeCaptionText);
 		exchangeRateTF.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -154,7 +182,7 @@ public class Application implements DocumentListener {
 		frame.getContentPane().add(exchangeRateTF);
 
 		// amount of currency to exchange
-		firstCurrencyTF = new DoubleJTextField();
+		firstCurrencyTF = new DoubleJTextField(currencyFormat);
 		firstCurrencyTF.setFont(new Font("Tahoma", Font.BOLD, 15));
 		firstCurrencyTF.setBackground(SystemColor.activeCaptionText);
 		firstCurrencyTF.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -164,7 +192,7 @@ public class Application implements DocumentListener {
 		frame.getContentPane().add(firstCurrencyTF);
 
 		// amount of currency after exchange
-		secondCurrencyTF = new JTextField();
+		secondCurrencyTF = new JFormattedTextField(currencyFormat);
 		secondCurrencyTF.setFont(new Font("Tahoma", Font.BOLD, 15));
 		secondCurrencyTF.setBackground(SystemColor.activeCaptionText);
 		secondCurrencyTF.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -173,54 +201,76 @@ public class Application implements DocumentListener {
 		secondCurrencyTF.setColumns(10);
 		frame.getContentPane().add(secondCurrencyTF);
 		
+		/*
+		 * 
+		 * JLabel component
+		 * 
+		 */
+
+		// label Current date
 		JLabel lblCurrencyDate = new JLabel("Data kursu");
 		lblCurrencyDate.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblCurrencyDate.setForeground(new Color(255, 255, 255));
 		lblCurrencyDate.setBounds(22, 11, 148, 14);
 		frame.getContentPane().add(lblCurrencyDate);
-		
+
+		// label Current currency type
 		JLabel lblTableType = new JLabel("Rodzaj tabeli");
 		lblTableType.setForeground(new Color(255, 255, 255));
 		lblTableType.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblTableType.setBounds(181, 11, 265, 14);
 		frame.getContentPane().add(lblTableType);
-		
+
+		// label Current currency
 		lblCurrency = new JLabel("Waluta");
 		lblCurrency.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblCurrency.setForeground(new Color(255, 255, 255));
 		lblCurrency.setBounds(20, 152, 426, 14);
 		frame.getContentPane().add(lblCurrency);
-		
+
+		// label Exchange rate
 		lblExchangeRate = new JLabel("Obowi\u0105zuj\u0105cy kurs");
 		lblExchangeRate.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblExchangeRate.setForeground(new Color(255, 255, 255));
 		lblExchangeRate.setBounds(20, 213, 426, 14);
 		frame.getContentPane().add(lblExchangeRate);
-		
+
+		// label Currency amount
 		lbCurrencyAmount = new JLabel("Ilo\u015B\u0107 w walucie");
 		lbCurrencyAmount.setForeground(new Color(255, 255, 255));
 		lbCurrencyAmount.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lbCurrencyAmount.setBounds(20, 277, 426, 14);
 		frame.getContentPane().add(lbCurrencyAmount);
-		
+
+		// label Amount
 		lblAmount = new JLabel("Warto\u015B\u0107 w PLN");
 		lblAmount.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblAmount.setForeground(new Color(255, 255, 255));
 		lblAmount.setBounds(20, 338, 430, 14);
 		frame.getContentPane().add(lblAmount);
 	}
+	
+	/*
+	 * 
+	 * Methods
+	 * 
+	 */
 
 	private void setCurrencyTF() {
 		try {
 			String value = firstCurrencyTF.getText();
 			BigDecimal currencyAmount = new BigDecimal(value);
 			BigDecimal result = currencyAmount.multiply(exchangeRate).setScale(2, BigDecimal.ROUND_HALF_UP);
-			secondCurrencyTF.setText(String.format("%1$,.2f", result));
-
+			secondCurrencyTF.setValue(result);
 		} catch (NumberFormatException ex) {
-			secondCurrencyTF.setText("");
 		}
 	}
+	
+	/*
+	 * 
+	 * Document listener
+	 * 
+	 */
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {

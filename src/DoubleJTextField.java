@@ -1,16 +1,19 @@
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.JTextField;
+import java.text.Format;
+import javax.swing.JFormattedTextField;
 
-public class DoubleJTextField extends JTextField {
+public class DoubleJTextField extends JFormattedTextField {
 
 	private static final long serialVersionUID = 1L;
 
-	public DoubleJTextField() {
+	public DoubleJTextField(Format currencyFormat) {
+		super(currencyFormat);
 		addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				char ch = e.getKeyChar();
 				if (!isNumber(ch) && !isValidSignal(ch) && !validatePoint(ch) && ch != '\b') {
+					System.out.println("Dupa");
 					e.consume();
 				}
 			}
@@ -36,10 +39,10 @@ public class DoubleJTextField extends JTextField {
 		}
 
 		if (getText() == null || "".equals(getText().trim())) {
-			setText("0.");
+			setValue("0.");
 			return false;
 		} else if ("-".equals(getText())) {
-			setText("-0.");
+			setValue("-0.");
 		}
 
 		return true;
